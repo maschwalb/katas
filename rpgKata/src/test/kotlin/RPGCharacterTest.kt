@@ -100,6 +100,15 @@ class RPGCharacterTest {
         thenCharacterHasHealth(otherCharacter, 1000)
     }
 
+    @Test
+    fun `character can not deal damage to itself`() {
+        givenSomeCharacter()
+
+        whenSomeAttacksItself()
+
+        thenCharacterHasHealth(someCharacter, 1000)
+    }
+
     private fun givenSomeCharacter() {
         whenCharacterIsCreated()
     }
@@ -118,6 +127,10 @@ class RPGCharacterTest {
 
     private fun whenSomeAttacksOther(damage: Int) {
         someCharacter.attack(otherCharacter, damage)
+    }
+
+    private fun whenSomeAttacksItself() {
+        someCharacter.attack(someCharacter, 100)
     }
 
     private fun whenSomeHealsOther(healing: Int) {

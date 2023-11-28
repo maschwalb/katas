@@ -18,6 +18,7 @@ class RPGCharacter {
         get() = _health.isAlive
 
     fun attack(other: RPGCharacter, damage: Int) {
+        if (amSelf(other)) return
         other.receiveAttack(damage)
     }
 
@@ -33,6 +34,8 @@ class RPGCharacter {
     fun receiveHealing(healing: Int) {
         _health.heal(healing)
     }
+
+    private fun amSelf(other: RPGCharacter) = this === other
 }
 
 class Health { // TODO: Considerar un value object (data class)
