@@ -69,18 +69,25 @@ class RPGCharacterTest {
     }
 
     @Test
-    fun `character can heal another`() {
+    fun `character can heal itself`() {
         givenSomeCharacter()
         givenOtherCharacter()
 
         whenSomeAttacksOther(200)
-        whenSomeHealsOther(100)
+        whenOtherHealsItself()
+        // TODO: Tests deberian tener un unico when
+        /*
+        Si necesito mas dde un when, es porque estoy acoplando comportamientos no deseados a un test
+        No deberia tener que atacar a un personaje para simular que tiene cierta cantidad de vida
+        Inyectar la vida en la creacion del personaje y hacerlo a traves de un factory
+         */
 
         thenCharacterHasHealth(otherCharacter, 900)
     }
 
     @Test
     fun `character can not heal a dead character`() {
+        // TODO: Fix
         givenSomeCharacter()
         givenOtherCharacter()
         givenOtherIsDead()
@@ -109,6 +116,17 @@ class RPGCharacterTest {
         thenCharacterHasHealth(someCharacter, 1000)
     }
 
+    @Test
+    fun `character can not heal others`() {
+        givenSomeCharacter()
+        givenOtherCharacter()
+
+        whenSomeAttacksOther(200)
+        whenSomeHealsOther(100)
+
+        thenCharacterHasHealth(otherCharacter, 800)
+    }
+
     private fun givenSomeCharacter() {
         whenCharacterIsCreated()
     }
@@ -135,6 +153,10 @@ class RPGCharacterTest {
 
     private fun whenSomeHealsOther(healing: Int) {
         someCharacter.heal(otherCharacter, healing)
+    }
+
+    private fun whenOtherHealsItself() {
+        otherCharacter.heal(otherCharacter, 100)
     }
 
     private fun thenCharacterHasHealth(character: RPGCharacter, expected: Int) {
