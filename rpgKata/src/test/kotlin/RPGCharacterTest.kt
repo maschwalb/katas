@@ -71,26 +71,17 @@ class RPGCharacterTest {
     @Test
     fun `character can heal itself`() {
         givenSomeCharacter()
-        givenOtherCharacter()
+        givenOtherCharacterWith(Health(800))
 
-        whenSomeAttacksOther(200)
         whenOtherHealsItself()
-        // TODO: Tests deberian tener un unico when
-        /*
-        Si necesito mas dde un when, es porque estoy acoplando comportamientos no deseados a un test
-        No deberia tener que atacar a un personaje para simular que tiene cierta cantidad de vida
-        Inyectar la vida en la creacion del personaje y hacerlo a traves de un factory
-         */
 
         thenCharacterHasHealth(otherCharacter, 900)
     }
 
     @Test
     fun `character can not heal a dead character`() {
-        // TODO: Fix
         givenSomeCharacter()
-        givenOtherCharacter()
-        givenOtherIsDead()
+        givenOtherCharacterWith(Health(0))
 
         whenSomeHealsOther(100)
 
@@ -119,9 +110,8 @@ class RPGCharacterTest {
     @Test
     fun `character can not heal others`() {
         givenSomeCharacter()
-        givenOtherCharacter()
+        givenOtherCharacterWith(Health(800))
 
-        whenSomeAttacksOther(200)
         whenSomeHealsOther(100)
 
         thenCharacterHasHealth(otherCharacter, 800)
@@ -135,9 +125,10 @@ class RPGCharacterTest {
         otherCharacter = RPGCharacter()
     }
 
-    private fun givenOtherIsDead() {
-        someCharacter.attack(otherCharacter, 1500)
+    private fun givenOtherCharacterWith(initialHealth: Health) {
+        otherCharacter = RPGCharacter(initialHealth)
     }
+
 
     private fun whenCharacterIsCreated() {
         someCharacter = RPGCharacter()
@@ -160,11 +151,11 @@ class RPGCharacterTest {
     }
 
     private fun thenCharacterHasHealth(character: RPGCharacter, expected: Int) {
-        assertEquals(expected, character.health)
+        assertEquals(Health(expected), character.health)
     }
 
     private fun thenCharacterHasLevelOne() {
-        assertEquals(1, someCharacter.level)
+        assertEquals(1, someCharacter.level.get())
     }
 
     private fun thenCharacterIsAlive(character: RPGCharacter, expected: Boolean) {

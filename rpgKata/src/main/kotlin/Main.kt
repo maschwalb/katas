@@ -4,15 +4,26 @@ fun main(args: Array<String>) {
     println("Program arguments: ${args.joinToString()}")
 }
 
-class RPGCharacter {
-    private val _health: Health = Health()
+class RPGCharacterFactory {
+    fun create(): RPGCharacter {
+        return RPGCharacter()
+    }
+
+    fun createWithHealth(health: Health): RPGCharacter {
+        return RPGCharacter(health)
+    }
+}
+
+class RPGCharacter(
+    private var _health: Health = Health(),
     private val _level: Level = Level()
+) {
 
-    val health: Int
-        get() = _health.get()
+    val health: Health
+        get() = _health.copy()
 
-    val level: Int // TODO: No usar primitivos
-        get() = _level.value
+    val level: Level
+        get() = _level.copy()
 
     val isAlive: Boolean
         get() = _health.isAlive
@@ -28,11 +39,11 @@ class RPGCharacter {
     }
 
     fun receiveAttack(damage: Int) {
-        _health.damage(damage)
+        _health = _health.damage(damage)
     }
 
     fun receiveHealing(healing: Int) {
-        _health.heal(healing)
+        _health = _health.heal(healing)
     }
 
     private fun amSelf(other: RPGCharacter) = this === other
@@ -42,41 +53,33 @@ class RPGCharacter {
     private fun canHeal(other: RPGCharacter) = !other.isAlive || !amSelf(other)
 }
 
-class Health { // TODO: Considerar un value object (data class)
-    private var value = INITIAL_HEALTH
-
+data class Health(val value: Int = INITIAL_HEALTH) {
     val isAlive: Boolean
         get() = value > 0
 
-    fun get(): Int {
+    fun damage(damage: Int): Health {
+        return this.copy(value = capDamage(value - damage))
+    }
+
+    fun heal(healing: Int): Health {
+        return this.copy(value = capHealing(value + healing))
+    }
+
+    private fun capDamage(value: Int): Int {
+        if (isDamageCapped(value)) return 0
         return value
     }
 
-    fun damage(damage: Int) {
-        value -= damage
-        capDamage()
-    }
+    private fun isDamageCapped(value: Int): Boolean = value < 0
 
-    fun heal(healing: Int) {
-        value += healing
-        capHealing()
-    }
-
-    private fun capDamage() {
-        if (isDamageCapped()) {
-            value = 0
+    private fun capHealing(value: Int): Int {
+        if (isHealingCapped(value)) {
+            return MAX_HEALTH
         }
+        return value
     }
 
-    private fun isDamageCapped(): Boolean = value < 0
-
-    private fun capHealing() {
-        if (isHealingCapped()) {
-            value = MAX_HEALTH
-        }
-    }
-
-    private fun isHealingCapped() = value > MAX_HEALTH
+    private fun isHealingCapped(value: Int) = value > MAX_HEALTH
 
     companion object {
         const val INITIAL_HEALTH = 1000
@@ -84,8 +87,9 @@ class Health { // TODO: Considerar un value object (data class)
     }
 }
 
-class Level {
-    val value = INITIAL_LEVEL
+data class Level(val value: Int = INITIAL_LEVEL) {
+
+    fun get(): Int = value
 
     companion object {
         const val INITIAL_LEVEL = 1
