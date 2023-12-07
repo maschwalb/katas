@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="RPGCharacterTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2023-11-28T18:40:44" hostname="MacBook120.local" time="0.028">
+  <properties/>
+  <testcase name="character should start alive()" classname="RPGCharacterTest" time="0.016"/>
+  <testcase name="character should start with level 1()" classname="RPGCharacterTest" time="0.001"/>
+  <testcase name="character can deal damage to another()" classname="RPGCharacterTest" time="0.001"/>
+  <testcase name="character can not have more than 1000 health()" classname="RPGCharacterTest" time="0.001"/>
+  <testcase name="character should start with 1000 health()" classname="RPGCharacterTest" time="0.001"/>
+  <testcase name="character can not heal a dead character()" classname="RPGCharacterTest" time="0.001"/>
+  <testcase name="character can kill another()" classname="RPGCharacterTest" time="0.001"/>
+  <testcase name="character can heal another()" classname="RPGCharacterTest" time="0.001"/>
+  <testcase name="character can not have negative health()" classname="RPGCharacterTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

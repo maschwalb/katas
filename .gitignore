@@ -1,2 +1,3 @@
-rpgKata/.idea/*
-rpgKata/build/*
+/rpgKata/build/
+/rpgKata/.gradle
+/rpgKata/.idea
