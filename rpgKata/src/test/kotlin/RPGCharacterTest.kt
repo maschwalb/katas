@@ -1,3 +1,6 @@
+import core.domain.character.RPGCharacter
+import core.domain.health.Health
+import core.domain.level.Level
 import org.junit.jupiter.api.Assertions.*
 import kotlin.test.Test
 
