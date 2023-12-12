@@ -18,12 +18,12 @@ class RPGCharacter(
         get() = _health.isAlive
 
     fun attack(other: RPGCharacter, damage: Double) {
-        if (canAttack(other)) return
+        if (cantAttack(other)) return
         other.receiveAttack(damage * _level.damageMultiplier(other.level))
     }
 
     fun heal(other: RPGCharacter, healing: Double) {
-        if (canHeal(other)) return
+        if (cantHeal(other)) return
         other.receiveHealing(healing)
     }
 
@@ -37,7 +37,7 @@ class RPGCharacter(
 
     private fun amSelf(other: RPGCharacter) = this === other
 
-    private fun canAttack(other: RPGCharacter) = amSelf(other)
+    private fun cantAttack(other: RPGCharacter) = amSelf(other)
 
-    private fun canHeal(other: RPGCharacter) = !other.isAlive || !amSelf(other)
+    private fun cantHeal(other: RPGCharacter) = !other.isAlive || !amSelf(other)
 }

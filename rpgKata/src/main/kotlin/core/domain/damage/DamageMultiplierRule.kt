@@ -1,5 +1,7 @@
 package core.domain.damage
 
-abstract class DamageMultiplierRule(nextRule: DamageMultiplierRule?) {
-    abstract fun apply(): Double
+import core.domain.level.Level
+
+interface DamageMultiplierRule {
+    fun apply(attackerLevel: Level, defenderLevel: Level): Double
 }

@@ -2,14 +2,14 @@ package core.domain.damage
 
 import core.domain.level.Level
 
-class FiveLevelsAboveRule(private val rule: DamageMultiplierRule, private val attackerLevel: Level, private val defenderLevel: Level): DamageMultiplierRule(rule) {
-    override fun apply(): Double {
-        return if (attackerIsFiveLevelsAbove()) {
+class FiveLevelsAboveRule(private val rule: DamageMultiplierRule): DamageMultiplierRule {
+    override fun apply(attackerLevel: Level, defenderLevel: Level): Double {
+        return if (attackerIsFiveLevelsAbove(attackerLevel, defenderLevel)) {
             1.5
         } else {
-            rule.apply()
+            rule.apply(attackerLevel, defenderLevel)
         }
     }
 
-    private fun attackerIsFiveLevelsAbove() = attackerLevel.value - defenderLevel.value >= 5
+    private fun attackerIsFiveLevelsAbove(attackerLevel: Level, defenderLevel: Level) = attackerLevel.value - defenderLevel.value >= 5
 }
