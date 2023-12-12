@@ -28,21 +28,21 @@ class RPGCharacter(
     val isAlive: Boolean
         get() = _health.isAlive
 
-    fun attack(other: RPGCharacter, damage: Int) {
+    fun attack(other: RPGCharacter, damage: Double) {
         if (canAttack(other)) return
-        other.receiveAttack(damage)
+        other.receiveAttack(damage * _level.damageMultiplier(other.level))
     }
 
-    fun heal(other: RPGCharacter, healing: Int) {
+    fun heal(other: RPGCharacter, healing: Double) {
         if (canHeal(other)) return
         other.receiveHealing(healing)
     }
 
-    fun receiveAttack(damage: Int) {
+    fun receiveAttack(damage: Double) {
         _health = _health.damage(damage)
     }
 
-    fun receiveHealing(healing: Int) {
+    fun receiveHealing(healing: Double) {
         _health = _health.heal(healing)
     }
 
@@ -53,45 +53,96 @@ class RPGCharacter(
     private fun canHeal(other: RPGCharacter) = !other.isAlive || !amSelf(other)
 }
 
-data class Health(val value: Int = INITIAL_HEALTH) {
+data class Health(val value: Double = INITIAL_HEALTH) {
     val isAlive: Boolean
-        get() = value > 0
+        get() = value > 0.0
 
-    fun damage(damage: Int): Health {
+    fun damage(damage: Double): Health {
         return this.copy(value = capDamage(value - damage))
     }
 
-    fun heal(healing: Int): Health {
+    fun heal(healing: Double): Health {
         return this.copy(value = capHealing(value + healing))
     }
 
-    private fun capDamage(value: Int): Int {
-        if (isDamageCapped(value)) return 0
+    private fun capDamage(value: Double): Double {
+        if (isDamageCapped(value)) return 0.0
         return value
     }
 
-    private fun isDamageCapped(value: Int): Boolean = value < 0
+    private fun isDamageCapped(value: Double): Boolean = value < 0
 
-    private fun capHealing(value: Int): Int {
+    private fun capHealing(value: Double): Double {
         if (isHealingCapped(value)) {
             return MAX_HEALTH
         }
         return value
     }
 
-    private fun isHealingCapped(value: Int) = value > MAX_HEALTH
+    private fun isHealingCapped(value: Double) = value > MAX_HEALTH
 
     companion object {
-        const val INITIAL_HEALTH = 1000
-        const val MAX_HEALTH = 1000
+        const val INITIAL_HEALTH: Double = 1000.0
+        const val MAX_HEALTH: Double = 1000.0
     }
 }
 
 data class Level(val value: Int = INITIAL_LEVEL) {
-
-    fun get(): Int = value
-
     companion object {
         const val INITIAL_LEVEL = 1
     }
+
+    fun damageMultiplier(otherLevel: Level): Double {
+        return DamageMultiplierRuleFactory.createRules(this, otherLevel).apply()
+    }
+}
+
+class DamageMultiplierRuleFactory {
+    companion object {
+        fun createRules(attackerLevel: Level, defenderLevel: Level): DamageMultiplierRule {
+            return FiveLevelsBelowRule(
+                FiveLevelsAboveRule(
+                    DefaultRule(),
+                    attackerLevel,
+                    defenderLevel
+                ),
+                attackerLevel,
+                defenderLevel
+            )
+        }
+    }
+}
+
+abstract class DamageMultiplierRule(nextRule: DamageMultiplierRule?) {
+    abstract fun apply(): Double
+}
+
+class DefaultRule(): DamageMultiplierRule(nextRule = null) {
+    override fun apply(): Double {
+        return 1.0
+    }
+}
+
+class FiveLevelsBelowRule(private val rule: DamageMultiplierRule, private val attackerLevel: Level, private val defenderLevel: Level): DamageMultiplierRule(rule) {
+    override fun apply(): Double {
+        return if (attackerIsFiveLevelsBelow()) {
+            0.5
+        } else {
+            rule.apply()
+        }
+    }
+
+    private fun attackerIsFiveLevelsBelow() = defenderLevel.value - attackerLevel.value >= 5
+}
+
+class FiveLevelsAboveRule(private val rule: DamageMultiplierRule, private val attackerLevel: Level, private val defenderLevel: Level): DamageMultiplierRule(rule) {
+    override fun apply(): Double {
+        return if (attackerIsFiveLevelsAbove()) {
+            1.5
+        } else {
+            rule.apply()
+        }
+    }
+
+    private fun attackerIsFiveLevelsAbove() = attackerLevel.value - defenderLevel.value >= 5
 }
