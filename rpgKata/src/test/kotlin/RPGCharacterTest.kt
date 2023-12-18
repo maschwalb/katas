@@ -1,6 +1,8 @@
 import core.domain.character.RPGCharacter
 import core.domain.health.Health
 import core.domain.level.Level
+import core.domain.position.Position
+import core.domain.range.RangeType
 import org.junit.jupiter.api.Assertions.*
 import kotlin.test.Test
 
@@ -63,7 +65,7 @@ class RPGCharacterTest {
     @Test
     fun `character can heal itself`() {
         givenSomeCharacter()
-        givenOtherCharacterWith(Health(800.0))
+        givenOtherCharacterWith(Health(800.0), position = Position(3))
 
         whenOtherHealsItself()
 
@@ -73,7 +75,7 @@ class RPGCharacterTest {
     @Test
     fun `character can not heal a dead character`() {
         givenSomeCharacter()
-        givenOtherCharacterWith(Health(0.0))
+        givenOtherCharacterWith(Health(0.0), position = Position(3))
 
         whenSomeHealsOther(100.0)
 
@@ -102,7 +104,7 @@ class RPGCharacterTest {
     @Test
     fun `character can not heal others`() {
         givenSomeCharacter()
-        givenOtherCharacterWith(Health(800.0))
+        givenOtherCharacterWith(Health(800.0), position = Position(3))
 
         whenSomeHealsOther(100.0)
 
@@ -111,7 +113,7 @@ class RPGCharacterTest {
 
     @Test
     fun `damage is increased in 50% when character is 5 levels above other`() {
-        givenSomeCharacterWith(initialLevel = Level(6))
+        givenSomeCharacterWith(initialLevel = Level(6), position = Position(0))
         givenOtherCharacterWith(initialLevel = Level(1))
 
         whenSomeAttacksOther(100.0)
@@ -121,7 +123,7 @@ class RPGCharacterTest {
 
     @Test
     fun `damage is reduced in 50% when character is 5 levels below other`() {
-        givenSomeCharacterWith(initialLevel = Level(1))
+        givenSomeCharacterWith(initialLevel = Level(1), position = Position(0))
         givenOtherCharacterWith(initialLevel = Level(6))
 
         whenSomeAttacksOther(100.0)
@@ -129,20 +131,49 @@ class RPGCharacterTest {
         thenCharacterHasHealth(otherCharacter, 950.0)
     }
 
+    @Test
+    fun `melee characters can only attack with range of 2 units`() {
+        givenSomeCharacterWith(rangeType = RangeType.MELEE, position = Position(0))
+        givenOtherCharacterWith(position = Position(3))
+
+        whenSomeAttacksOther(100.0)
+
+        thenCharacterHasHealth(otherCharacter, 1000.0)
+    }
+
+    @Test
+    fun `ranged characters can only attack with range of 20 units`() {
+        givenSomeCharacterWith(rangeType = RangeType.RANGED, position = Position(0))
+        givenOtherCharacterWith(position = Position(21))
+
+        whenSomeAttacksOther(100.0)
+
+        thenCharacterHasHealth(otherCharacter, 1000.0)
+    }
+
     private fun givenSomeCharacter() {
         whenCharacterIsCreated()
     }
 
-    private fun givenSomeCharacterWith(initialHealth: Health = Health(1000.0), initialLevel: Level = Level(1)) {
-        someCharacter = RPGCharacter(initialHealth, initialLevel)
+    private fun givenSomeCharacterWith(
+        initialHealth: Health = Health(1000.0),
+        initialLevel: Level = Level(1),
+        rangeType: RangeType = RangeType.MELEE,
+        position: Position = Position(0)
+    ) {
+        someCharacter = RPGCharacter(initialHealth, initialLevel, rangeType, position)
     }
 
     private fun givenOtherCharacter() {
         otherCharacter = RPGCharacter()
     }
 
-    private fun givenOtherCharacterWith(initialHealth: Health = Health(1000.0), initialLevel: Level = Level(1)) {
-        otherCharacter = RPGCharacter(initialHealth, initialLevel)
+    private fun givenOtherCharacterWith(
+        initialHealth: Health = Health(1000.0),
+        initialLevel: Level = Level(1),
+        position: Position = Position(0)
+    ) {
+        otherCharacter = RPGCharacter(initialHealth, initialLevel, RangeType.MELEE, position)
     }
 
     private fun whenCharacterIsCreated() {
