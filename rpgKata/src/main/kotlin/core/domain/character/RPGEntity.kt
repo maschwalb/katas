@@ -18,4 +18,5 @@ interface RPGEntity {
     fun belongsToFaction(faction: Faction): Boolean
     fun leaveFaction(faction: Faction)
     fun isAlly(other: RPGEntity): Boolean
+    fun damageMultiplier(level: Level): Double
 }

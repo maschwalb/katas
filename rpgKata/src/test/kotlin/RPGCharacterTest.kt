@@ -1,4 +1,5 @@
 import core.domain.character.RPGCharacter
+import core.domain.character.RPGObject
 import core.domain.factions.Faction
 import core.domain.health.Health
 import core.domain.level.Level
@@ -11,6 +12,7 @@ import kotlin.test.Test
 class RPGCharacterTest {
     private lateinit var someCharacter: RPGCharacter
     private lateinit var otherCharacter: RPGCharacter
+    private lateinit var someObject: RPGObject
 
     @Test
     fun `character should start with 1000 health`() {
@@ -201,6 +203,28 @@ class RPGCharacterTest {
         whenSomeHealsOther(100.0)
 
         thenCharacterHasHealth(otherCharacter, 900.0)
+    }
+
+    @Test
+    fun `characters can attack objects`() {
+        givenSomeCharacter()
+        givenAnObject()
+
+        whenSomeAttacksObject(100.0)
+
+        thenObjectHasHealth(Health(900.0))
+    }
+
+    private fun thenObjectHasHealth(health: Health) {
+        assertEquals(health, someObject.getHealth())
+    }
+
+    private fun whenSomeAttacksObject(damage: Double) {
+        someCharacter.attack(someObject, damage)
+    }
+
+    private fun givenAnObject() {
+        someObject = RPGObject()
     }
 
     private fun thenCharactersAreAllies(someCharacter: RPGCharacter, otherCharacter: RPGCharacter) {

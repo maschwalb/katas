@@ -5,9 +5,9 @@ import core.domain.health.Health
 import core.domain.level.Level
 import core.domain.position.Position
 
-class RPGObject : RPGEntity {
+class RPGObject(private var health: Health = Health()) : RPGEntity {
     override fun getHealth(): Health {
-        TODO("Not yet implemented")
+        return health
     }
 
     override fun getLevel(): Level {
@@ -31,7 +31,7 @@ class RPGObject : RPGEntity {
     }
 
     override fun receiveAttack(damage: Double) {
-        TODO("Not yet implemented")
+        health = health.damage(damage)
     }
 
     override fun receiveHealing(healing: Double) {
@@ -52,5 +52,9 @@ class RPGObject : RPGEntity {
 
     override fun isAlly(other: RPGEntity): Boolean {
         TODO("Not yet implemented")
+    }
+
+    override fun damageMultiplier(level: Level): Double {
+        return 1.0
     }
 }

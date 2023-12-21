@@ -22,7 +22,11 @@ class RPGCharacter(
 
     override fun attack(other: RPGEntity, damage: Double) {
         if (cantAttack(other)) return
-        other.receiveAttack(damage * _level.damageMultiplier(other.getLevel()))
+        other.receiveAttack(damage * other.damageMultiplier(_level))
+    }
+
+    override fun damageMultiplier(level: Level): Double {
+        return level.damageMultiplier(_level)
     }
 
     override fun heal(other: RPGEntity, healing: Double) {
@@ -55,7 +59,7 @@ class RPGCharacter(
     }
 
     private fun amSelf(other: RPGEntity) = this === other
-    private fun cantAttack(other: RPGEntity) = amSelf(other) || isOutOfRange(other) || isAlly(other)
+    private fun cantAttack(other: RPGEntity) = other !is RPGObject && (amSelf(other) || isOutOfRange(other) || isAlly(other))
     private fun isOutOfRange(other: RPGEntity) = other.getPosition().value - _position.value >= _range.value
     private fun cantHeal(other: RPGEntity) = !other.isAlive() || (!amSelf(other) && !isAlly(other))
 }
