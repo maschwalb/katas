@@ -1,4 +1,5 @@
 import core.domain.character.RPGCharacter
+import core.domain.factions.Faction
 import core.domain.health.Health
 import core.domain.level.Level
 import core.domain.position.Position
@@ -151,6 +152,69 @@ class RPGCharacterTest {
         thenCharacterHasHealth(otherCharacter, 1000.0)
     }
 
+    @Test
+    fun `character can join a faction`() {
+        givenSomeCharacter()
+        val faction = Faction("faction")
+
+        whenCharacterJoinsFaction(someCharacter, faction)
+
+        thenCharacterBelongsToFaction(someCharacter, faction)
+    }
+
+    @Test
+    fun `character can leave a faction`() {
+        val faction = Faction("faction")
+        givenSomeCharacterWith(factions = listOf(faction))
+
+        whenCharacterLeavesFaction(someCharacter, faction)
+
+        thenCharacterDoesntBelongToFaction(someCharacter, faction)
+    }
+
+    @Test
+    fun `characters in the same faction are allies`() {
+        val faction = Faction("faction")
+        givenSomeCharacterWith(factions = listOf(faction))
+        givenOtherCharacterWith(factions = listOf(faction))
+
+        thenCharactersAreAllies(someCharacter, otherCharacter)
+    }
+
+    @Test
+    fun `allies cannot deal damage to each other`() {
+        val faction = Faction("faction")
+        givenSomeCharacterWith(factions = listOf(faction))
+        givenOtherCharacterWith(factions = listOf(faction))
+
+        whenSomeAttacksOther(100.0)
+
+        thenCharacterHasHealth(otherCharacter, 1000.0)
+    }
+
+    @Test
+    fun `characters can heal allies`() {
+        val faction = Faction("faction")
+        givenSomeCharacterWith(factions = listOf(faction))
+        givenOtherCharacterWith(factions = listOf(faction), initialHealth = Health(800.0))
+
+        whenSomeHealsOther(100.0)
+
+        thenCharacterHasHealth(otherCharacter, 900.0)
+    }
+
+    private fun thenCharactersAreAllies(someCharacter: RPGCharacter, otherCharacter: RPGCharacter) {
+        assertTrue(someCharacter.isAlly(otherCharacter))
+    }
+
+    private fun thenCharacterDoesntBelongToFaction(character: RPGCharacter, faction: Faction) {
+        assertFalse(character.belongsToFaction(faction))
+    }
+
+    private fun whenCharacterLeavesFaction(character: RPGCharacter, faction: Faction) {
+        character.leaveFaction(faction)
+    }
+
     private fun givenSomeCharacter() {
         whenCharacterIsCreated()
     }
@@ -159,9 +223,10 @@ class RPGCharacterTest {
         initialHealth: Health = Health(1000.0),
         initialLevel: Level = Level(1),
         rangeType: RangeType = RangeType.MELEE,
-        position: Position = Position(0)
+        position: Position = Position(0),
+        factions: List<Faction> = emptyList()
     ) {
-        someCharacter = RPGCharacter(initialHealth, initialLevel, rangeType, position)
+        someCharacter = RPGCharacter(initialHealth, initialLevel, rangeType, position, factions)
     }
 
     private fun givenOtherCharacter() {
@@ -171,9 +236,10 @@ class RPGCharacterTest {
     private fun givenOtherCharacterWith(
         initialHealth: Health = Health(1000.0),
         initialLevel: Level = Level(1),
-        position: Position = Position(0)
+        position: Position = Position(0),
+        factions: List<Faction> = emptyList()
     ) {
-        otherCharacter = RPGCharacter(initialHealth, initialLevel, RangeType.MELEE, position)
+        otherCharacter = RPGCharacter(initialHealth, initialLevel, RangeType.MELEE, position, factions)
     }
 
     private fun whenCharacterIsCreated() {
@@ -196,16 +262,23 @@ class RPGCharacterTest {
         otherCharacter.heal(otherCharacter, 100.0)
     }
 
+    private fun whenCharacterJoinsFaction(rpgCharacter: RPGCharacter, faction: Faction) {
+        rpgCharacter.joinFaction(faction)
+    }
+
     private fun thenCharacterHasHealth(character: RPGCharacter, expected: Double) {
-        assertEquals(Health(expected), character.health)
+        assertEquals(Health(expected), character.getHealth())
     }
 
     private fun thenCharacterHasLevelOne() {
-        assertEquals(1, someCharacter.level.value)
+        assertEquals(1, someCharacter.getLevel().value)
     }
 
     private fun thenCharacterIsAlive(character: RPGCharacter, expected: Boolean) {
-        assertEquals(expected, character.isAlive)
+        assertEquals(expected, character.isAlive())
+    }
+
+    private fun thenCharacterBelongsToFaction(rpgCharacter: RPGCharacter, faction: Faction) {
+        assertTrue(rpgCharacter.belongsToFaction(faction))
     }
 }
-    

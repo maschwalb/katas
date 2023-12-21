@@ -1,5 +1,6 @@
 package core.domain.character
 
+import core.domain.factions.Faction
 import core.domain.health.Health
 import core.domain.level.Level
 import core.domain.position.Position
@@ -9,45 +10,52 @@ class RPGCharacter(
     private var _health: Health = Health(),
     private val _level: Level = Level(),
     rangeType: RangeType = RangeType.MELEE,
-    private val _position: Position = Position()
-) {
+    private val _position: Position = Position(),
+    private var factions: List<Faction> = emptyList<Faction>().toMutableList()
+) : RPGEntity {
     private val _range = rangeType.getRange()
 
-    val health: Health
-        get() = _health.copy()
+    override fun getHealth(): Health = _health.copy()
+    override fun getLevel(): Level = _level.copy()
+    override fun getPosition(): Position = _position.copy()
+    override fun isAlive(): Boolean = _health.isAlive
 
-    val level: Level
-        get() = _level.copy()
-
-    val position: Position
-        get() = _position.copy()
-
-    val isAlive: Boolean
-        get() = _health.isAlive
-
-    fun attack(other: RPGCharacter, damage: Double) {
+    override fun attack(other: RPGEntity, damage: Double) {
         if (cantAttack(other)) return
-        other.receiveAttack(damage * _level.damageMultiplier(other.level))
+        other.receiveAttack(damage * _level.damageMultiplier(other.getLevel()))
     }
 
-    fun heal(other: RPGCharacter, healing: Double) {
+    override fun heal(other: RPGEntity, healing: Double) {
         if (cantHeal(other)) return
         other.receiveHealing(healing)
     }
 
-    fun receiveAttack(damage: Double) {
+    override fun receiveAttack(damage: Double) {
         _health = _health.damage(damage)
     }
 
-    fun receiveHealing(healing: Double) {
+    override fun receiveHealing(healing: Double) {
         _health = _health.heal(healing)
     }
 
-    private fun amSelf(other: RPGCharacter) = this === other
+    override fun joinFaction(faction: Faction) {
+        factions += faction
+    }
 
-    private fun cantAttack(other: RPGCharacter) = amSelf(other) || isOutOfRange(other)
+    override fun belongsToFaction(faction: Faction): Boolean {
+        return factions.contains(faction)
+    }
 
-    private fun isOutOfRange(other: RPGCharacter) = other.position.value - _position.value >= _range.value
+    override fun leaveFaction(faction: Faction) {
+        factions -= faction
+    }
 
-    private fun cantHeal(other: RPGCharacter) = !other.isAlive || !amSelf(other)
+    override fun isAlly(other: RPGEntity): Boolean {
+        return factions.any { other.belongsToFaction(it) }
+    }
+
+    private fun amSelf(other: RPGEntity) = this === other
+    private fun cantAttack(other: RPGEntity) = amSelf(other) || isOutOfRange(other) || isAlly(other)
+    private fun isOutOfRange(other: RPGEntity) = other.getPosition().value - _position.value >= _range.value
+    private fun cantHeal(other: RPGEntity) = !other.isAlive() || (!amSelf(other) && !isAlly(other))
 }
