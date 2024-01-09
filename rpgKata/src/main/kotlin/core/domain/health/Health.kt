@@ -1,7 +1,7 @@
 package core.domain.health
 
 data class Health(val value: Double = INITIAL_HEALTH) {
-    val isAlive: Boolean
+    val hasHealth: Boolean
         get() = value > 0.0
 
     fun damage(damage: Double): Health {
